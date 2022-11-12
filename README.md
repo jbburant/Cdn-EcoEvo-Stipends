@@ -1,4 +1,4 @@
-# Cdn-EcoEvo-Stipends
+# Ecology and Evolution Graduate Stipends in Canada
 
 ## Brief Description
 Data on minimum stipends, tuition, and cost of living for graduate programs in ecology and evolution at major universities in Canada (2022). This repository also includes R code to produce a series of summary statistics and plots exploring variation in minimum financial support to graduate researchers, and how this funding compares to cost of tuition and rent.
