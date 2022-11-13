@@ -12,10 +12,10 @@ Data on minimum stipends, tuition, and cost of living for graduate programs in e
 3. 
 
 ## Variable definitions
-- university = (required)
-- province = (required)
-- city = (required)
-- department = (required)
+- university = university name or abbreviation [basic info]
+- province = province in which university is located [basic info]
+- city = city (proper) in which the university is located (e.g., SFU is in Burnaby not Vancouver) [basic info]
+- department = academic department through which the ecology and evolution (or adjacent) program is offered [basic info]
 - degree = (required)
 - website = (required)
 - tuition_dom = (required)
