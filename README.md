@@ -8,11 +8,8 @@ See this twitter thread for more context: <insert link>
 
 ## Questions
 1. How do post-tuition* minimum stipend amounts compare across ecology and evolution programs in Canada?
-(See the results)[]
 2. Do post-tuition* hourly rates meet provincial minimum wage requirements?
-(See the results)[]
 3. Do post-tuition* stipends cover the annual cost of renting a one-bedroom, non-central apartment in the city in which the institution is located?
-(See the results)[]
 
 **Why *post-tuition*?** Simply, tuition fees are highly variable and are effectively an in-house transfer of funds from departments and research budgets to universities. This money is never seen by graduate students; the question is whether they can live on the money left over after tuition is deducted.
 
