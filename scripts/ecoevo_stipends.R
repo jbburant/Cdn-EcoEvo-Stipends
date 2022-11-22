@@ -68,7 +68,10 @@ stipends |>
   summarise(min_t = min(tuition_dom, na.rm = TRUE), 
             max_t = max(tuition_dom, na.rm = TRUE), 
             avg_t = mean(tuition_dom, na.rm = TRUE), 
-            med_t = median(tuition_dom, na.rm = TRUE))
+            med_t = median(tuition_dom, na.rm = TRUE), 
+            n_t   = n(), 
+            sd_t  = sd(tuition_dom, na.rm = TRUE), 
+            se_t  =  sd_t / sqrt(n_t))
 hist(stipends$tuition_dom)
 
 ## what is the range of minimum stipends (after tuition is deducted)?
@@ -77,7 +80,10 @@ stipends |>
   summarise(min_s = min(net_stipend_dom, na.rm = TRUE), 
             max_s = max(net_stipend_dom, na.rm = TRUE), 
             avg_s = mean(net_stipend_dom, na.rm = TRUE), 
-            med_s = median(net_stipend_dom, na.rm = TRUE))
+            med_s = median(net_stipend_dom, na.rm = TRUE), 
+            n_s   = n(), 
+            sd_s  = sd(net_stipend_dom, na.rm = TRUE), 
+            se_s  =  sd_s / sqrt(n_s))
 hist(stipends$net_stipend_dom)
 
 
@@ -88,7 +94,10 @@ stipends |>
   summarise(min_w = min(prop_net_wage_min_wage, na.rm = TRUE), 
             max_w = max(prop_net_wage_min_wage, na.rm = TRUE), 
             avg_w = mean(prop_net_wage_min_wage, na.rm = TRUE), 
-            med_w = median(prop_net_wage_min_wage, na.rm = TRUE))
+            med_w = median(prop_net_wage_min_wage, na.rm = TRUE), 
+            n_w   = n(), 
+            sd_w  = sd(prop_net_wage_min_wage, na.rm = TRUE), 
+            se_w  =  sd_w / sqrt(n_w))
 hist(stipends$prop_net_wage_min_wage)
 
 ## what is the range of annual rental costs?
@@ -96,8 +105,11 @@ stipends |>
   summarise(min_r = min(rent_year, na.rm = TRUE), 
             max_r = max(rent_year, na.rm = TRUE), 
             avg_r = mean(rent_year, na.rm = TRUE), 
-            med_r = median(rent_year, na.rm = TRUE))
-hist(stipends$prop_net_wage_min_wage)
+            med_r = median(rent_year, na.rm = TRUE), 
+            n_r   = n(), 
+            sd_r  = sd(rent_year, na.rm = TRUE), 
+            se_r  =  sd_r / sqrt(n_r))
+hist(stipends$rent_year)
 
 ## plot net stipends against the average annual rent
 ggplot(data = stipends, 
