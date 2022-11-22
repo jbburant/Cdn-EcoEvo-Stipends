@@ -32,11 +32,13 @@ getwd()
 ## load required packages
 library(googlesheets4)
 library(dplyr)
+library(tidyr)
 library(skimr)
 library(ggplot2)
 library(ggthemes)
 library(ggExtra)
 library(cowplot)
+library(patchwork)
 library(showtext)
 
 ## set a plotting theme
@@ -56,7 +58,10 @@ stipends <- read_sheet(
   ## round calculated dollar amounts and proportions to two decimal places
   mutate(across(c("gross_wage_dom", "net_wage_dom", "prop_stipend_rent", 
                   "prop_gross_wage_min_wage", "prop_net_wage_min_wage"), 
-                round, 2))
+                round, 2)) |> 
+  mutate(province = factor(province, levels = c("BC", "AB", "SK", 
+                                                "MB", "ON", "QC", 
+                                                "NB", "NS", "NL")))
 
 ## overview of dataset
 names(stipends)
@@ -83,7 +88,7 @@ stipends |>
             med_s = median(net_stipend_dom, na.rm = TRUE), 
             n_s   = n(), 
             sd_s  = sd(net_stipend_dom, na.rm = TRUE), 
-            se_s  =  sd_s / sqrt(n_s))
+            se_s  =  sd_s / sqrt(n_s)) |> View()
 hist(stipends$net_stipend_dom)
 
 
@@ -143,4 +148,74 @@ ggplot(data = stipends,
        y = "Minimum domestic stipend \nafter tuition ($)") + 
   theme(legend.position = "bottom")
 
+# ggplot(data = stipends, 
+#        mapping = aes(x = interaction(province, university), 
+#                      y = net_stipend_dom, 
+#                      group = degree, colour = province)) + 
+#   geom_hline(mapping = aes(yintercept = mean(net_stipend_dom))) + 
+#   geom_segment(mapping = aes(
+#     x = interaction(province, university), 
+#     xend = interaction(province, university), 
+#     y = mean(net_stipend_dom), 
+#     yend = net_stipend_dom), color="grey") +
+#   geom_point(size = 4, alpha = 0.5) + 
+#   theme_light() +
+#   theme(panel.grid.major.x = element_blank(),
+#         panel.border = element_blank(),
+#         axis.ticks.x = element_blank(), 
+#         axis.text.x = element_text(angle = 45, hjust = 1)) + 
+#   facet_wrap(~ degree) + 
+#   labs(x = NULL, y = "Minimum domestic stipend \nafter tuition ($)")
 
+p1 <- ggplot(data = stipends |> 
+               filter(degree == "MSc"), 
+       mapping = aes(x = interaction(university, province), 
+                     y = net_stipend_dom, 
+                     group = degree, colour = province)) + 
+  geom_hline(mapping = aes(yintercept = mean(net_stipend_dom))) + 
+  geom_segment(mapping = aes(
+    x = interaction(university, province), 
+    xend = interaction(university, province), 
+    y = mean(net_stipend_dom), 
+    yend = net_stipend_dom), color="grey") +
+  geom_point(size = 4) + 
+  scale_y_continuous(limits = c(6900, 28100), 
+                     breaks = seq(7000, 28000, by = 7000)) + 
+  scale_colour_viridis_d(name = NULL) + 
+  facet_wrap(~ degree) + 
+  labs(x = NULL, y = "Minimum domestic stipend \nafter tuition ($)", 
+       caption = "Average post-tuition MSc stipend  = $14,491.46") + 
+  theme_light() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 8), 
+        legend.position = "none")
+
+p2 <- ggplot(data = stipends |> 
+               filter(degree == "PhD"), 
+       mapping = aes(x = interaction(university, province), 
+                     y = net_stipend_dom, 
+                     group = degree, colour = province)) + 
+  geom_hline(mapping = aes(yintercept = mean(net_stipend_dom))) + 
+  geom_segment(mapping = aes(
+    x = interaction(university, province), 
+    xend = interaction(university, province), 
+    y = mean(net_stipend_dom), 
+    yend = net_stipend_dom), color="grey") +
+  geom_point(size = 4) + 
+  scale_y_continuous(limits = c(6900, 28100), 
+                     breaks = seq(7000, 28000, by = 7000)) + 
+  scale_colour_viridis_d(name = NULL) + 
+  facet_wrap(~ degree) + 
+  labs(x = NULL, y = "", 
+       caption = "Average post-tuition PhD stipend = $16,277.18") + 
+  theme_light() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.x = element_blank(), 
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 8), 
+        axis.text.y = element_blank(), 
+        legend.position = "right")
+
+p1 + p2
