@@ -34,9 +34,13 @@ library(googlesheets4)
 library(dplyr)
 library(skimr)
 library(ggplot2)
+library(ggthemes)
 library(ggExtra)
 library(cowplot)
 library(showtext)
+
+## set a plotting theme
+theme_set(theme_few())
 
 ## authorize access to Google Sheets
 gs4_auth()
@@ -70,14 +74,46 @@ hist(stipends$tuition_dom)
 ## what is the range of minimum stipends (after tuition is deducted)?
 stipends |> 
   group_by(degree) |> 
-  summarise(min_t = min(net_stipend_dom, na.rm = TRUE), 
-            max_t = max(net_stipend_dom, na.rm = TRUE), 
-            avg_t = mean(net_stipend_dom, na.rm = TRUE), 
-            med_t = median(net_stipend_dom, na.rm = TRUE))
+  summarise(min_s = min(net_stipend_dom, na.rm = TRUE), 
+            max_s = max(net_stipend_dom, na.rm = TRUE), 
+            avg_s = mean(net_stipend_dom, na.rm = TRUE), 
+            med_s = median(net_stipend_dom, na.rm = TRUE))
+hist(stipends$net_stipend_dom)
 
 
+## what is the range of post-tuition wages relative to minimum wages?
+stipends |> 
+  filter(prop_net_wage_min_wage > 0) |> 
+  group_by(degree) |> 
+  summarise(min_w = min(prop_net_wage_min_wage, na.rm = TRUE), 
+            max_w = max(prop_net_wage_min_wage, na.rm = TRUE), 
+            avg_w = mean(prop_net_wage_min_wage, na.rm = TRUE), 
+            med_w = median(prop_net_wage_min_wage, na.rm = TRUE))
+hist(stipends$prop_net_wage_min_wage)
 
+## what is the range of annual rental costs?
+stipends |> 
+  summarise(min_r = min(rent_year, na.rm = TRUE), 
+            max_r = max(rent_year, na.rm = TRUE), 
+            avg_r = mean(rent_year, na.rm = TRUE), 
+            med_r = median(rent_year, na.rm = TRUE))
+hist(stipends$prop_net_wage_min_wage)
 
+## plot net stipends against the average annual rent
+ggplot(data = stipends, 
+       mapping = aes(x = rent_year, y = net_stipend_dom, group = degree)) + 
+  geom_abline(slope = 1, intercept = 0, lwd = 1.5, colour = "grey50", lty = 6) + 
+  geom_smooth(mapping = aes(linetype = degree), se = FALSE, 
+              method = "lm", colour = "blue", lwd = 1.5) + 
+  geom_point(mapping = aes(colour = province, shape = degree), 
+             size = 3.5, alpha = 0.5) + 
+  scale_colour_viridis_d(name = NULL) + 
+  # scale_x_continuous(limits = c(7500, 24000)) +
+  # scale_y_continuous(limits = c(7500, 24000)) +
+  # coord_fixed() + 
+  labs(x = "Average annual cost of rent ($)", 
+       y = "Minimum domestic stipend after tuition ($)") + 
+  theme(legend.position = "bottom")
 
 
 
