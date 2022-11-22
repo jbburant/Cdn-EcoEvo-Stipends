@@ -120,12 +120,27 @@ ggplot(data = stipends,
   geom_point(mapping = aes(colour = province, shape = degree), 
              size = 3.5, alpha = 0.5) + 
   scale_colour_viridis_d(name = NULL) + 
-  # scale_x_continuous(limits = c(7500, 24000)) +
-  # scale_y_continuous(limits = c(7500, 24000)) +
-  # coord_fixed() + 
+  # scale_x_continuous(limits = c(6500, 28500)) +
+  # scale_y_continuous(limits = c(6500, 28500)) +
+  # coord_fixed() +
   labs(x = "Average annual cost of rent ($)", 
        y = "Minimum domestic stipend after tuition ($)") + 
   theme(legend.position = "bottom")
 
+ggplot(data = stipends, 
+       mapping = aes(x = rent_year, y = net_stipend_dom)) + 
+  geom_abline(slope = 1, intercept = 0, lwd = 1.5, colour = "grey50", lty = 6) + 
+  geom_smooth(mapping = aes(colour = degree, fill = degree), 
+              method = "lm", lwd = 1.5) + 
+  geom_point(mapping = aes(colour = degree), 
+             size = 3.5, alpha = 0.8) + 
+  scale_colour_brewer(palette = "Dark2", name = NULL) + 
+  scale_fill_brewer(palette = "Dark2", name = NULL) + 
+  scale_x_continuous(limits = c(6900, 28000)) +
+  scale_y_continuous(limits = c(6900, 28000)) +
+  coord_fixed() +
+  labs(x = "Average annual cost of rent ($)", 
+       y = "Minimum domestic stipend \nafter tuition ($)") + 
+  theme(legend.position = "bottom")
 
 
