@@ -2,7 +2,7 @@
 # EcoEvo Graduate Stipends in Canada --------------------------------------
 
 ## Author: Joey Burant
-## Last updated: 14-11-2022
+## Last updated: 23-11-2022
 
 ## Github repo: https://github.com/jbburant/Cdn-EcoEvo-Stipends
 
@@ -30,19 +30,18 @@ getwd()
 # here::here()
 
 ## load required packages
-library(googlesheets4)
-library(dplyr)
-library(tidyr)
-library(skimr)
-library(ggplot2)
-library(ggthemes)
-library(ggExtra)
-library(cowplot)
-library(patchwork)
-library(showtext)
+library(googlesheets4)  ## connect to google sheets
+library(dplyr)          ## data manipulation
+library(skimr)          ## data summary
+library(ggplot2)        ## plotting
+library(see)            ## plotting theme
 
 ## set a plotting theme
-theme_set(theme_few())
+theme_set(theme_blackboard())
+
+## specify a colour palette
+pal <- c("#005F73", "#0A9396", "#94D2BD", "#E9D8A6", 
+         "#EE9B00", "#CA6702", "#BB3E03", "#AE2012", "#9B2226")
 
 ## authorize access to Google Sheets
 gs4_auth()
@@ -59,15 +58,19 @@ stipends <- read_sheet(
   mutate(across(c("gross_wage_dom", "net_wage_dom", "prop_stipend_rent", 
                   "prop_gross_wage_min_wage", "prop_net_wage_min_wage"), 
                 round, 2)) |> 
+  ## order provinces from  west to east
   mutate(province = factor(province, levels = c("BC", "AB", "SK", 
                                                 "MB", "ON", "QC", 
                                                 "NB", "NS", "NL")))
 
 ## overview of dataset
 names(stipends)
-skim(stipends)
+skimr::skim(stipends)
 
-## what is the range of tuition values?
+
+# summary statistics ------------------------------------------------------
+
+## annual tuition (excluding ancillary fees)
 stipends |> 
   group_by(degree) |> 
   summarise(min_t = min(tuition_dom, na.rm = TRUE), 
@@ -77,9 +80,10 @@ stipends |>
             n_t   = n(), 
             sd_t  = sd(tuition_dom, na.rm = TRUE), 
             se_t  =  sd_t / sqrt(n_t))
+
 hist(stipends$tuition_dom)
 
-## what is the range of minimum stipends (after tuition is deducted)?
+## post-tuition minimum stipends
 stipends |> 
   group_by(degree) |> 
   summarise(min_s = min(net_stipend_dom, na.rm = TRUE), 
@@ -88,11 +92,12 @@ stipends |>
             med_s = median(net_stipend_dom, na.rm = TRUE), 
             n_s   = n(), 
             sd_s  = sd(net_stipend_dom, na.rm = TRUE), 
-            se_s  =  sd_s / sqrt(n_s)) |> View()
+            se_s  =  sd_s / sqrt(n_s))
+
 hist(stipends$net_stipend_dom)
 
 
-## what is the range of post-tuition wages relative to minimum wages?
+## net hourly rate as a proportion of provincial minimum wage
 stipends |> 
   filter(prop_net_wage_min_wage > 0) |> 
   group_by(degree) |> 
@@ -103,119 +108,136 @@ stipends |>
             n_w   = n(), 
             sd_w  = sd(prop_net_wage_min_wage, na.rm = TRUE), 
             se_w  =  sd_w / sqrt(n_w))
+
 hist(stipends$prop_net_wage_min_wage)
 
-## what is the range of annual rental costs?
+## proportion of annual rental costs covered by net stipend
 stipends |> 
-  summarise(min_r = min(rent_year, na.rm = TRUE), 
-            max_r = max(rent_year, na.rm = TRUE), 
-            avg_r = mean(rent_year, na.rm = TRUE), 
-            med_r = median(rent_year, na.rm = TRUE), 
+  summarise(min_r = min(prop_stipend_rent, na.rm = TRUE), 
+            max_r = max(prop_stipend_rent, na.rm = TRUE), 
+            avg_r = mean(prop_stipend_rent, na.rm = TRUE), 
+            med_r = median(prop_stipend_rent, na.rm = TRUE), 
             n_r   = n(), 
-            sd_r  = sd(rent_year, na.rm = TRUE), 
+            sd_r  = sd(prop_stipend_rent, na.rm = TRUE), 
             se_r  =  sd_r / sqrt(n_r))
+
 hist(stipends$rent_year)
+
+
+# visualizations ----------------------------------------------------------
 
 ## plot net stipends against the average annual rent
 ggplot(data = stipends, 
-       mapping = aes(x = rent_year, y = net_stipend_dom, group = degree)) + 
+       mapping = aes(x = rent_year, 
+                     y = net_stipend_dom, 
+                     colour = province)) + 
   geom_abline(slope = 1, intercept = 0, lwd = 1.5, colour = "grey50", lty = 6) + 
-  geom_smooth(mapping = aes(linetype = degree), se = FALSE, 
-              method = "lm", colour = "blue", lwd = 1.5) + 
-  geom_point(mapping = aes(colour = province, shape = degree), 
-             size = 3.5, alpha = 0.5) + 
-  scale_colour_viridis_d(name = NULL) + 
-  # scale_x_continuous(limits = c(6500, 28500)) +
-  # scale_y_continuous(limits = c(6500, 28500)) +
-  # coord_fixed() +
-  labs(x = "Average annual cost of rent ($)", 
-       y = "Minimum domestic stipend after tuition ($)") + 
-  theme(legend.position = "bottom")
-
-ggplot(data = stipends, 
-       mapping = aes(x = rent_year, y = net_stipend_dom)) + 
-  geom_abline(slope = 1, intercept = 0, lwd = 1.5, colour = "grey50", lty = 6) + 
-  geom_smooth(mapping = aes(colour = degree, fill = degree), 
-              method = "lm", lwd = 1.5) + 
-  geom_point(mapping = aes(colour = degree), 
-             size = 3.5, alpha = 0.8) + 
-  scale_colour_brewer(palette = "Dark2", name = NULL) + 
-  scale_fill_brewer(palette = "Dark2", name = NULL) + 
-  scale_x_continuous(limits = c(6900, 28000)) +
-  scale_y_continuous(limits = c(6900, 28000)) +
+  geom_smooth(se = FALSE, 
+              method = "lm", colour = "grey", lwd = 1.5) + 
+  geom_point(size = 3) + 
+  facet_wrap(~ degree) + 
+  scale_colour_manual(values = pal, name = NULL) + 
+  scale_x_continuous(limits = c(6500, 28500)) +
+  scale_y_continuous(limits = c(6500, 28500)) +
   coord_fixed() +
   labs(x = "Average annual cost of rent ($)", 
-       y = "Minimum domestic stipend \nafter tuition ($)") + 
-  theme(legend.position = "bottom")
+       y = "Minimum domestic stipend after tuition ($)") + 
+  theme(legend.position = "bottom") + 
+  guides(colour = guide_legend(nrow = 1))
 
-# ggplot(data = stipends, 
-#        mapping = aes(x = interaction(province, university), 
-#                      y = net_stipend_dom, 
-#                      group = degree, colour = province)) + 
-#   geom_hline(mapping = aes(yintercept = mean(net_stipend_dom))) + 
-#   geom_segment(mapping = aes(
-#     x = interaction(province, university), 
-#     xend = interaction(province, university), 
-#     y = mean(net_stipend_dom), 
-#     yend = net_stipend_dom), color="grey") +
-#   geom_point(size = 4, alpha = 0.5) + 
-#   theme_light() +
-#   theme(panel.grid.major.x = element_blank(),
-#         panel.border = element_blank(),
-#         axis.ticks.x = element_blank(), 
-#         axis.text.x = element_text(angle = 45, hjust = 1)) + 
-#   facet_wrap(~ degree) + 
-#   labs(x = NULL, y = "Minimum domestic stipend \nafter tuition ($)")
+## lollipop chart of net stipends (after tuition)
+(
+  p1 <- stipends |> 
+    group_by(degree) |> 
+    mutate(mean_stipend = mean(net_stipend_dom)) |> 
+    ungroup() |> 
+    ggplot(mapping = aes(x = interaction(university, province), 
+                         y = net_stipend_dom, 
+                         colour = province)) + 
+    geom_hline(mapping = aes(yintercept = mean_stipend), 
+               colour = "grey", lwd = 1) + 
+    geom_segment(mapping = aes(x    = interaction(university, province), 
+                               xend = interaction(university, province), 
+                               y    = mean_stipend, 
+                               yend = net_stipend_dom), 
+                 colour = "grey") + 
+    geom_point(size = 3) + 
+    facet_wrap(~ degree, ncol = 1) + 
+    scale_y_continuous(limits = c(6900, 28100), 
+                       breaks = seq(8000, 28000, by = 4000)) + 
+    scale_colour_manual(values = pal, name = NULL) + 
+    labs(x = NULL, y = "Minimum domestic stipend \nafter tuition ($)") + 
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7.5), 
+          legend.position = "bottom") + 
+    guides(colour = guide_legend(nrow = 1))
+)
 
-p1 <- ggplot(data = stipends |> 
-               filter(degree == "MSc"), 
-       mapping = aes(x = interaction(university, province), 
-                     y = net_stipend_dom, 
-                     group = degree, colour = province)) + 
-  geom_hline(mapping = aes(yintercept = mean(net_stipend_dom))) + 
-  geom_segment(mapping = aes(
-    x = interaction(university, province), 
-    xend = interaction(university, province), 
-    y = mean(net_stipend_dom), 
-    yend = net_stipend_dom), color="grey") +
-  geom_point(size = 4) + 
-  scale_y_continuous(limits = c(6900, 28100), 
-                     breaks = seq(7000, 28000, by = 7000)) + 
-  scale_colour_viridis_d(name = NULL) + 
-  facet_wrap(~ degree) + 
-  labs(x = NULL, y = "Minimum domestic stipend \nafter tuition ($)", 
-       caption = "Average post-tuition MSc stipend  = $14,491.46") + 
-  theme_light() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.border = element_blank(),
-        axis.ticks.x = element_blank(), 
-        axis.text.x = element_text(angle = 45, hjust = 1, size = 8), 
-        legend.position = "none")
+ggsave("figures/net_stipends_lollipop.jpeg", plot = p1, 
+       height = 4, width = 6, units = "in", dpi = "retina")
 
-p2 <- ggplot(data = stipends |> 
-               filter(degree == "PhD"), 
-       mapping = aes(x = interaction(university, province), 
-                     y = net_stipend_dom, 
-                     group = degree, colour = province)) + 
-  geom_hline(mapping = aes(yintercept = mean(net_stipend_dom))) + 
-  geom_segment(mapping = aes(
-    x = interaction(university, province), 
-    xend = interaction(university, province), 
-    y = mean(net_stipend_dom), 
-    yend = net_stipend_dom), color="grey") +
-  geom_point(size = 4) + 
-  scale_y_continuous(limits = c(6900, 28100), 
-                     breaks = seq(7000, 28000, by = 7000)) + 
-  scale_colour_viridis_d(name = NULL) + 
-  facet_wrap(~ degree) + 
-  labs(x = NULL, y = "", 
-       caption = "Average post-tuition PhD stipend = $16,277.18") + 
-  theme_light() +
-  theme(panel.grid.major.x = element_blank(),
-        panel.border = element_blank(),
-        axis.ticks.x = element_blank(), 
-        axis.text.x = element_text(angle = 45, hjust = 1, size = 8), 
-        axis.text.y = element_blank(), 
-        legend.position = "right")
+## lollipop chart of calculated net hourly rates (after tuition) 
+## relative to provincial minimum wages
+(
+  p2 <- stipends |> 
+  group_by(degree) |> 
+  mutate(mean_prop_wage = mean(prop_net_wage_min_wage)) |> 
+  ungroup() |> 
+  ggplot(mapping = aes(x = interaction(university, province), 
+                       y = prop_net_wage_min_wage, 
+                       colour = province)) + 
+  geom_hline(mapping = aes(yintercept = mean_prop_wage), 
+             colour = "grey", lwd = 1) + 
+  geom_hline(yintercept = 1, lty = 2, colour = "grey") + 
+  geom_segment(mapping = aes(x    = interaction(university, province), 
+                             xend = interaction(university, province), 
+                             y    = mean_prop_wage, 
+                             yend = prop_net_wage_min_wage), 
+               colour = "grey") + 
+  geom_point(size = 3) + 
+  facet_wrap(~ degree, ncol = 1) + 
+  scale_y_continuous(limits = c(0.25, 1.10),
+                     breaks = seq(0.25, 1.0, by = 0.25)) +
+  scale_colour_manual(values = pal, name = NULL) + 
+  labs(x = NULL, y = "Calculated net hourly rate as a \nproportion of minimum wage") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7.5), 
+        legend.position = "bottom") + 
+  guides(colour = guide_legend(nrow = 1))
+)
 
-p1 + p2
+ggsave("figures/prop_minimum_wage_lollipop.jpeg", plot = p2, 
+       height = 4, width = 6, units = "in", dpi = "retina")
+
+
+## lollipop chart of proportion of annual rent covered by net stipend
+(
+  p3 <- stipends |> 
+  group_by(degree) |> 
+  mutate(mean_prop_rent = mean(prop_stipend_rent, na.rm = TRUE)) |> 
+  ungroup() |> 
+  ggplot(mapping = aes(x = interaction(university, province), 
+                       y = prop_stipend_rent, 
+                       colour = province)) + 
+  geom_hline(mapping = aes(yintercept = mean_prop_rent), 
+             colour = "grey", lwd = 1) + 
+  geom_hline(yintercept = 1, lty = 2, colour = "grey") + 
+  geom_segment(mapping = aes(x    = interaction(university, province), 
+                             xend = interaction(university, province), 
+                             y    = mean_prop_rent, 
+                             yend = prop_stipend_rent), 
+               colour = "grey") + 
+  geom_point(size = 3) + 
+  facet_wrap(~ degree, ncol = 1) + 
+  scale_y_continuous(limits = c(0.4, 1.9),
+                     breaks = seq(0.5, 1.75, by = 0.25)) +
+  scale_colour_manual(values = pal, name = NULL) + 
+  labs(x = NULL, y = "Proportion of annual rent covered \nby post-tuition stipend") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 7.5), 
+        legend.position = "bottom") + 
+  guides(colour = guide_legend(nrow = 1))
+)
+
+ggsave("figures/prop_annual_rent_lollipop.jpeg", plot = p3, 
+       height = 4, width = 6, units = "in", dpi = "retina")
+
+
+# end of script -----------------------------------------------------------
