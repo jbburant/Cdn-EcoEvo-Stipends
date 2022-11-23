@@ -175,7 +175,7 @@ ggplot(data = stipends,
 )
 
 ggsave("figures/net_stipends_lollipop.jpeg", plot = p1, 
-       height = 4, width = 6, units = "in", dpi = "retina")
+       height = 4, width = 6.5, units = "in", dpi = "retina")
 
 ## lollipop chart of calculated net hourly rates (after tuition) 
 ## relative to provincial minimum wages
@@ -207,7 +207,7 @@ ggsave("figures/net_stipends_lollipop.jpeg", plot = p1,
 )
 
 ggsave("figures/prop_minimum_wage_lollipop.jpeg", plot = p2, 
-       height = 4, width = 6, units = "in", dpi = "retina")
+       height = 4, width = 6.5, units = "in", dpi = "retina")
 
 
 ## lollipop chart of proportion of annual rent covered by net stipend
@@ -239,7 +239,7 @@ ggsave("figures/prop_minimum_wage_lollipop.jpeg", plot = p2,
 )
 
 ggsave("figures/prop_annual_rent_lollipop.jpeg", plot = p3, 
-       height = 4, width = 6, units = "in", dpi = "retina")
+       height = 4, width = 6.5, units = "in", dpi = "retina")
 
 
 # write dataset to csv ----------------------------------------------------
