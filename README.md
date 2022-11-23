@@ -51,7 +51,7 @@ See this twitter thread for more context: <insert link>
 
 ## Data sources
 - the initial set of universities considered was extracted and expanded from the Maclean's University Ranking: https://education.macleans.ca/education/canadas-best-universities-by-reputation-rankings-2023/
-- tuition and stipend amounts were collated from university and departmental websites (see variable:website); typically, exact tuition values were found on a separate fee schedule
+- tuition and stipend amounts were collated from university and departmental websites (see variable: website); typically, exact tuition values were found on a separate fee schedule
 - cost of living and average rental costs were extracted from Numbeo on 09 November 2022: https://www.numbeo.com/cost-of-living/
 - the average number of hours worked annually in Canada (used to translate stipends to hourly rates) was taken from the StatsCan Labour Survey (via OECD) and was 1685 h in 2021: https://stats.oecd.org/index.aspx?DataSetCode=ANHRS
  
