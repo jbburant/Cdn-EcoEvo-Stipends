@@ -114,6 +114,7 @@ hist(stipends$prop_net_wage_min_wage)
 
 ## proportion of annual rental costs covered by net stipend
 stipends |> 
+  group_by(degree) |> 
   summarise(min_r = min(prop_stipend_rent, na.rm = TRUE), 
             max_r = max(prop_stipend_rent, na.rm = TRUE), 
             avg_r = mean(prop_stipend_rent, na.rm = TRUE), 
