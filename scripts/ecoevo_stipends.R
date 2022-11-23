@@ -30,8 +30,9 @@ getwd()
 # here::here()
 
 ## load required packages
-library(googlesheets4)  ## connect to google sheets
+library(googlesheets4)  ## read data from google sheets
 library(dplyr)          ## data manipulation
+library(readr)          ## read and write data
 library(skimr)          ## data summary
 library(ggplot2)        ## plotting
 library(see)            ## plotting theme
@@ -52,7 +53,7 @@ gs4_auth()
 stipends <- read_sheet(
   "https://docs.google.com/spreadsheets/d/1w4KM7JGm7XmVwhuIM9nC5R6i685czj5g2GvO9B3Tb3E/edit", 
   sheet = "included", ## which sheet to read from
-  na = c("", "NA", 0) ## which values to treat as NAs
+  na = c("", "NA", 0, "??") ## which values to treat as NAs
   ) |> 
   ## round calculated dollar amounts and proportions to two decimal places
   mutate(across(c("gross_wage_dom", "net_wage_dom", "prop_stipend_rent", 
@@ -238,6 +239,11 @@ ggsave("figures/prop_minimum_wage_lollipop.jpeg", plot = p2,
 
 ggsave("figures/prop_annual_rent_lollipop.jpeg", plot = p3, 
        height = 4, width = 6, units = "in", dpi = "retina")
+
+
+# write dataset to csv ----------------------------------------------------
+
+write_csv(stipends, "data/eco_evo_stipends_2022.csv")
 
 
 # end of script -----------------------------------------------------------
