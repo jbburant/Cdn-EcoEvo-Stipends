@@ -4,7 +4,7 @@
 Data on minimum stipends, tuition, and cost of living for graduate programs (M.Sc. and Ph.D.) in ecology and evolution at major universities in Canada (2022). This repository also includes R code to produce a series of summary statistics and plots exploring variation in minimum financial support to graduate researchers, and how this funding compares to cost of tuition and rent.
 
 ## Context
-See this twitter thread for more context: <insert link>
+See this twitter thread for more context: https://twitter.com/jbburant/status/1595413427786321922?s=20&t=zBqTPgGHA32KYJ3hIMqwHA
 
 ## Questions
 1. How do post-tuition* minimum stipend amounts compare across ecology and evolution programs in Canada?
